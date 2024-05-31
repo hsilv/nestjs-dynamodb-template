@@ -23,5 +23,18 @@ functions:
           path: /{proxy+}
 
 plugins:
-  - serverless-jetpack
+  - serverless-esbuild
   - serverless-offline
+
+build:
+  esbuild: false
+
+custom:
+  esbuild:
+    bundle: true
+    minify: true
+    sourcemap: true
+    target: 'node16'
+    define: { 'process.env.NODE_ENV': '"production"' }
+    platform: 'node'
+    outdir: '.build'
