@@ -1,6 +1,9 @@
 import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { User } from './user.schema';
+import { CreateUserDto } from './user.dto';
+import { StatusCodes } from 'http-status-codes';
 
 @ApiTags('User')
 @Controller('user')
@@ -8,21 +11,21 @@ export class UserController {
     constructor(private readonly userService: UserService) { }
 
     @ApiOperation({ summary: 'Create User' })
-    @ApiResponse({ status: 200, description: 'User created.' })
+    @ApiBody({ type: CreateUserDto }) // Esto hará que Swagger pida un cuerpo de tipo User
+    @ApiResponse({ status: StatusCodes.CREATED, description: 'User created.' })
+    @ApiResponse({ status: StatusCodes.BAD_REQUEST, description: 'Invalid input.' })
+    @ApiResponse({ status: StatusCodes.CONFLICT, description: 'User already exists.' })
+    @ApiResponse({ status: StatusCodes.INTERNAL_SERVER_ERROR, description: 'Server error.' })
     @Post()
-    async createUser(@Body() body: any): Promise<any> {
-        const user = await this.userService.createUser(body);
-        return { status: true, data: user };
+    async createUser(@Body() body: CreateUserDto): Promise<any> {
+        const user = await this.userService.create({ id: this.userService.generateUserId(body.email), ...body });
+        return user;
     }
 
-    @ApiOperation({ summary: 'Get User by ID' })
+    @ApiOperation({ summary: 'Get User' })
     @ApiResponse({ status: 200, description: 'User found.' })
     @Get(':id')
-    async getUserById(@Param() { id }: any): Promise<any> {
-        const user = await this.userService.getUserById(id);
-        if (!user) {
-            throw new NotFoundException(`User with ID "${id}" not found`);
-        }
-        return { status: true, data: user };
+    async getUser(@Param('id') id: string): Promise<any> {
+        const user = await this.userService.findOne({ id });
     }
 }

@@ -1,46 +1,49 @@
 // src/user/user.service.ts
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import * as AWS from 'aws-sdk';
-import { v4 as uuid } from 'uuid';
-
-const dynamoDB = new AWS.DynamoDB.DocumentClient();
+import { InjectModel, Model } from 'nestjs-dynamoose';
+import { User, UserKey } from './user.schema';
+import { v5 as uuidv5 } from 'uuid';
+import { createHash } from 'crypto';
+import { ConflictException } from '@nestjs/common';
 
 @Injectable()
 export class UserService {
-    async createUser(dto: any): Promise<any> {
-        const user = {
-            id: uuid(),
-            ...dto,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        };
+    constructor(
+        @InjectModel('User') private userModel: Model<User, UserKey>
+    ) { }
 
+    async create(user: User) {
         try {
-            await dynamoDB
-                .put({
-                    TableName: process.env.USERS_TABLE_NAME,
-                    Item: user,
-                })
-                .promise();
+            const created = await this.userModel.create(user)
+            return created
+
         } catch (error) {
-            console.log('Error creating user:', error);
-            throw new InternalServerErrorException(error);
+            if (error.name === 'ConditionalCheckFailedException') {
+                throw new ConflictException('User already exists');
+            }
+            else {
+                console.error(error);
+                throw new InternalServerErrorException('Error creating user');
+            }
         }
-        return user;
     }
-    async getUserById(id: string): Promise<any> {
-        let user;
-        try {
-            const result = await dynamoDB
-                .get({
-                    TableName: process.env.USERS_TABLE_NAME,
-                    Key: { id },
-                })
-                .promise();
-            user = result.Item;
-        } catch (error) {
-            throw new InternalServerErrorException(error);
-        }
-        return user;
+
+    update(key: UserKey, user: Partial<User>) {
+        return this.userModel.update(key, user)
+    }
+
+    findOne(key: UserKey) {
+        return this.userModel.get(key)
+    }
+
+    findAll() {
+        return this.userModel.scan().exec();
+    }
+
+    generateUserId(email: string) {
+        const hash = createHash('sha256');
+        hash.update(email);
+        const id = hash.digest('hex');
+        return id;
     }
 }

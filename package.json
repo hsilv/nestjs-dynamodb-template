@@ -11,7 +11,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start:dev": "dotenv -e ./.aws/dev.env -- nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -40,6 +40,7 @@
     "aws-serverless-express": "^3.4.0",
     "class-validator": "^0.14.1",
     "dynamoose": "^4.0.1",
+    "http-status-codes": "^2.3.0",
     "ioredis": "^5.4.1",
     "kafkajs": "^2.2.4",
     "mqtt": "^5.7.0",
@@ -50,7 +51,8 @@
     "serverless": "^4.0.24",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-esbuild": "^1.52.1",
-    "socket-module": "link:@nestjs/websockets/socket-module"
+    "socket-module": "link:@nestjs/websockets/socket-module",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.3.2",

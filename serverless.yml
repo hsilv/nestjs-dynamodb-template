@@ -13,6 +13,7 @@ provider:
   logRetentionInDays: 1
   timeout: 15
   environment:
+    STAGE: ${self:provider.stage}
     USERS_TABLE_NAME: ${self:custom.usersTable.name}
   iamRoleStatements: ${file(.aws/iam/role-statements.yml)}
 
