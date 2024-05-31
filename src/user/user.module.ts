@@ -10,7 +10,7 @@ import { DynamooseModule } from 'nestjs-dynamoose';
       name: 'User',
       schema: UserSchema,
       options: {
-        tableName: process.env.STAGE ? `users-${process.env.STAGE}` : 'users',
+        tableName: process.env.USERS_TABLE_NAME ? process.env.USERS_TABLE_NAME : 'users-dev',
         create: true,
         throughput: 'ON_DEMAND'
       }

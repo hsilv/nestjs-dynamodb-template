@@ -1,5 +1,5 @@
 // src/user/user.service.ts
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 import { User, UserKey } from './user.schema';
 import { v5 as uuidv5 } from 'uuid';
@@ -20,6 +20,8 @@ export class UserService {
         } catch (error) {
             if (error.name === 'ConditionalCheckFailedException') {
                 throw new ConflictException('User already exists');
+            } else if (error.name === 'TypeMismatch' || error.name === 'ValidationError') {
+                throw new BadRequestException('Invalid input', error.name === 'ValidationError' ? error.message + ', bad email format' : error.message);
             }
             else {
                 console.error(error);
@@ -36,8 +38,8 @@ export class UserService {
         return this.userModel.get(key)
     }
 
-    findAll() {
-        return this.userModel.scan().exec();
+    async findAll() {
+        return await this.userModel.scan().exec();
     }
 
     generateUserId(email: string) {

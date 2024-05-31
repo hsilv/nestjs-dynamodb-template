@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { DynamooseModule } from 'nestjs-dynamoose';
 import { DynamoDB } from 'aws-sdk';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { DynamoDB } from 'aws-sdk';
         region: process.env.AWS_REGION
       },
     }),
-    UserModule
+    UserModule,
+    RolesModule
   ],
   controllers: [AppController],
   providers: [AppService],

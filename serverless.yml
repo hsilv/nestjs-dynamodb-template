@@ -15,11 +15,13 @@ provider:
   environment:
     STAGE: ${self:provider.stage}
     USERS_TABLE_NAME: ${self:custom.usersTable.name}
+    ROLES_TABLE_NAME: ${self:custom.rolesTable.name}
   iamRoleStatements: ${file(.aws/iam/role-statements.yml)}
 
 resources:
   Resources:
     usersTable: ${file(.aws/db/users-table.yml)}
+    rolesTable: ${file(.aws/db/roles-table.yml)}
   
 
 functions:
@@ -44,7 +46,6 @@ custom:
     minify: true
     sourcemap: true
     target: 'node16'
-    define: { 'process.env.NODE_ENV': '"production"' }
     platform: 'node'
     outdir: '.build'
     external: ['class-transformer/storage']
@@ -53,3 +54,6 @@ custom:
   usersTable:
     name: ${self:service}-${self:provider.stage}-users
     arn: !GetAtt usersTable.Arn
+  rolesTable:
+    name: ${self:service}-${self:provider.stage}-roles
+    arn: !GetAtt rolesTable.Arn
