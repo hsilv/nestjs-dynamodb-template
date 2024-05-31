@@ -46,6 +46,7 @@ custom:
     define: { 'process.env.NODE_ENV': '"production"' }
     platform: 'node'
     outdir: '.build'
+    external: ['class-transformer/storage']
   dotenv:
     path: ./.aws/${self:provider.stage}.env
   usersTable:
