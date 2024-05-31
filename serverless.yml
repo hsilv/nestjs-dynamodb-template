@@ -12,6 +12,13 @@ provider:
   memorySize: 2048
   logRetentionInDays: 1
   timeout: 15
+  environment:
+    USERS_TABLE_NAME: ${self:custom.usersTable.name}
+  iamRoleStatements: ${file(.aws/iam/role-statements.yml)}
+
+resources:
+  Resources:
+    usersTable: ${file(.aws/db/users-table.yml)}
   
 
 functions:
@@ -25,6 +32,7 @@ functions:
 plugins:
   - serverless-esbuild
   - serverless-offline
+  - serverless-dotenv-plugin
 
 build:
   esbuild: false
@@ -38,3 +46,8 @@ custom:
     define: { 'process.env.NODE_ENV': '"production"' }
     platform: 'node'
     outdir: '.build'
+  dotenv:
+    path: ./.aws/${self:provider.stage}.env
+  usersTable:
+    name: ${self:service}-${self:provider.stage}-users
+    arn: !GetAtt usersTable.Arn
